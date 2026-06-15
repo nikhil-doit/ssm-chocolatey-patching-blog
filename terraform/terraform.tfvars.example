@@ -2,9 +2,3 @@ region = "us-east-1"
 
 target_account_a_id = "REPLACE_WITH_ACCOUNT_A_ID"
 target_account_b_id = "REPLACE_WITH_ACCOUNT_B_ID"
-
-subnet_id_account_a         = "REPLACE_ME"
-security_group_id_account_a = "REPLACE_ME"
-
-subnet_id_account_b         = "REPLACE_ME"
-security_group_id_account_b = "REPLACE_ME"
