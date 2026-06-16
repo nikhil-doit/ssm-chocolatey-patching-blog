@@ -23,7 +23,7 @@ variable "target_tag_value" {
   default = "chocolatey"
 }
 
-# SSM Parameter Store - Package config
+# SSM Parameter Store - Package config (flat array as expected by the script)
 resource "aws_ssm_parameter" "packages" {
   name  = "/chocolatey/packages"
   type  = "String"
@@ -40,10 +40,10 @@ resource "aws_ssm_document" "chocolatey" {
     schemaVersion: '2.2'
     description: Install and manage packages via Chocolatey
     parameters:
-      PackageParameterName:
+      PackageNameArn:
         type: String
-        default: '${aws_ssm_parameter.packages.name}'
-        description: SSM Parameter Store name containing package list
+        default: '${aws_ssm_parameter.packages.arn}'
+        description: The ARN of the parameter that includes the package names
     mainSteps:
       - action: aws:runPowerShellScript
         name: InstallAndManageChocolateyPackages
@@ -56,15 +56,10 @@ resource "aws_ssm_document" "chocolatey" {
           runCommand:
             - |
               try {
-                # Install Chocolatey if not present
                 if (!(Test-Path "$($env:ProgramData)\chocolatey\choco.exe")) {
-                  Set-ExecutionPolicy Bypass -Scope Process -Force
-                  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-                  iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+                  Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
                   Write-Output "Chocolatey installed successfully"
                 }
-
-                # Add Chocolatey to PATH for this session
                 $env:Path += ";$($env:ProgramData)\chocolatey\bin"
 
                 # Ensure Chocolatey is in system PATH permanently
@@ -74,18 +69,18 @@ resource "aws_ssm_document" "chocolatey" {
                   [Environment]::SetEnvironmentVariable("Path", "$machinePath;$chocoPath", "Machine")
                 }
 
-                # Read package config from SSM Parameter Store
-                $Packages = ((Get-SSMParameterValue -Name '{{ PackageParameterName }}').Parameters[0].Value) | ConvertFrom-Json
-                Write-Output "Package list from parameter store: $Packages"
+                $Packages = ((Get-SSMParameterValue -Name '{{ PackageNameArn }}').Parameters[0].Value) | ConvertFrom-Json
+                Write-Output "Package list from the parameter store is $Packages"
 
                 foreach ($Package in $Packages) {
-                  Write-Output "Processing package: $($Package.Name)..."
-
-                  # Check if package is installed using parseable output
+                  if ($Package.Name -eq "") {
+                    Write-Output "Package configuration missing Name. Skipping..."
+                    continue
+                  }
+                  Write-Output "New Package - $($Package.Name)...."
                   $ChocoOutput = choco list $Package.Name -r -e
 
                   if (-not $ChocoOutput) {
-                    # Package not installed - install it
                     if ($Package.Version -eq "latest") {
                       Write-Output "Not installed. Installing latest version..."
                       choco install $Package.Name -r -y --no-progress $Package.Switches
@@ -94,17 +89,16 @@ resource "aws_ssm_document" "chocolatey" {
                       choco install $Package.Name --version=$($Package.Version) -r -y --no-progress $Package.Switches
                     }
                   } elseif ($Package.Upgrade -eq "yes") {
-                    # Package installed and upgrade=yes
                     $parts = $ChocoOutput.split('|')
                     $currentVersion = $parts[1]
                     if ($Package.Version -eq "latest") {
-                      Write-Output "Installed ($currentVersion). Upgrade=yes. Upgrading to latest..."
+                      Write-Output "Installed ($currentVersion). Upgrading to latest..."
                       choco upgrade $Package.Name -r -y --no-progress $Package.Switches
                     } elseif ([System.Version]$Package.Version -gt [System.Version]$currentVersion) {
                       Write-Output "Installed ($currentVersion). Upgrading to $($Package.Version)..."
                       choco upgrade $Package.Name --version=$($Package.Version) -r -y --no-progress $Package.Switches
                     } else {
-                      Write-Output "Installed ($currentVersion). Already at or above target version. Skipping..."
+                      Write-Output "Installed ($currentVersion). Already at or above target. Skipping..."
                     }
                   } elseif ($Package.Upgrade -eq "no") {
                     Write-Output "Installed. Upgrade=no. Skipping..."
@@ -130,7 +124,7 @@ resource "aws_ssm_association" "chocolatey" {
   }
 
   parameters = {
-    PackageParameterName = aws_ssm_parameter.packages.name
+    PackageNameArn = aws_ssm_parameter.packages.arn
   }
 }
 
