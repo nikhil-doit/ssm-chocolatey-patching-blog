@@ -93,9 +93,10 @@ resource "aws_ssm_document" "chocolatey" {
                 $switches = $pkg.Switches
 
                 # Check if package is installed
-                $installed = & choco list $name --local-only --exact 2>$null | Select-String $name
+                $installed = & choco list --exact $name 2>$null
+                $isInstalled = $installed | Where-Object { $_ -match "^$name\s" }
 
-                if (-not $installed) {
+                if (-not $isInstalled) {
                   # Install
                   if ($version -eq 'latest') {
                     $cmd = "choco install $name -y $switches"
@@ -106,11 +107,7 @@ resource "aws_ssm_document" "chocolatey" {
                   Invoke-Expression $cmd
                 } elseif ($upgrade -eq 'yes') {
                   # Upgrade
-                  if ($version -eq 'latest') {
-                    $cmd = "choco upgrade $name -y $switches"
-                  } else {
-                    $cmd = "choco upgrade $name --version=$version -y $switches"
-                  }
+                  $cmd = "choco upgrade $name -y $switches"
                   Write-Output "Upgrading: $cmd"
                   Invoke-Expression $cmd
                 } else {
