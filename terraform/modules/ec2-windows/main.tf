@@ -37,6 +37,19 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy" "ssm_get_parameter" {
+  name = "SSMGetParameter"
+  role = aws_iam_role.ssm_role.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "ssm:GetParameter"
+      Resource = "*"
+    }]
+  })
+}
+
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "SSMWindowsProfile-${var.instance_name}"
   role = aws_iam_role.ssm_role.name
