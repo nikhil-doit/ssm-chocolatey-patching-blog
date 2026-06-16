@@ -32,10 +32,10 @@ module "ec2" {
 module "ssm_chocolatey" {
   source = "./modules/ssm-chocolatey"
 
-  # Upgrade demo: change 7zip and notepadplusplus to latest with Upgrade=yes
+  # Initial install: older versions for 7zip/notepad++, latest for others
   packages = [
-    { Name = "7zip", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "7zip", Version = "23.01", Upgrade = "no", Switches = "" },
+    { Name = "notepadplusplus", Version = "8.6.0", Upgrade = "no", Switches = "" },
     { Name = "googlechrome", Version = "latest", Upgrade = "yes", Switches = "" },
     { Name = "firefox", Version = "latest", Upgrade = "yes", Switches = "" },
     { Name = "vim", Version = "latest", Upgrade = "no", Switches = "" },
