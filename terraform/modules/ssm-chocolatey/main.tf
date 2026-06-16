@@ -50,11 +50,29 @@ resource "aws_ssm_document" "chocolatey" {
         inputs:
           runCommand:
             - |
-              # Install Chocolatey if not present
+              # Ensure Chocolatey is installed and in PATH
+              $chocoPath = "C:\ProgramData\chocolatey\bin"
               if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-                Set-ExecutionPolicy Bypass -Scope Process -Force
-                [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-                Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+                if (Test-Path "$chocoPath\choco.exe") {
+                  # Chocolatey exists but not in PATH - add it
+                  $env:Path += ";$chocoPath"
+                } else {
+                  # Fresh install
+                  Set-ExecutionPolicy Bypass -Scope Process -Force
+                  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+                  # Remove partial install if exists
+                  if (Test-Path "C:\ProgramData\chocolatey") {
+                    Remove-Item "C:\ProgramData\chocolatey" -Recurse -Force
+                  }
+                  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+                  $env:Path += ";$chocoPath"
+                }
+              }
+
+              # Verify choco is available
+              if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+                Write-Error "Chocolatey installation failed"
+                exit 1
               }
 
               # Read package config from SSM Parameter Store
@@ -69,7 +87,7 @@ resource "aws_ssm_document" "chocolatey" {
                 $switches = $pkg.Switches
 
                 # Check if package is installed
-                $installed = choco list $name --local-only --exact 2>$null | Select-String $name
+                $installed = & choco list $name --local-only --exact 2>$null | Select-String $name
 
                 if (-not $installed) {
                   # Install
