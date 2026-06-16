@@ -28,6 +28,23 @@ module "ec2" {
   instance_name     = "SSM-Choco-Test"
 }
 
+# SSM Chocolatey - Package Management
+module "ssm_chocolatey" {
+  source = "./modules/ssm-chocolatey"
+
+  packages = [
+    { Name = "7zip", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "googlechrome", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "firefox", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "vim", Version = "latest", Upgrade = "yes", Switches = "" },
+  ]
+
+  association_schedule = "rate(1 day)"
+  target_tag_key       = "PatchGroup"
+  target_tag_value     = "chocolatey"
+}
+
 # Outputs
 output "instance_id" {
   value = module.ec2.instance_id
@@ -35,4 +52,12 @@ output "instance_id" {
 
 output "vpc_id" {
   value = module.network.vpc_id
+}
+
+output "ssm_document_name" {
+  value = module.ssm_chocolatey.document_name
+}
+
+output "ssm_association_id" {
+  value = module.ssm_chocolatey.association_id
 }
