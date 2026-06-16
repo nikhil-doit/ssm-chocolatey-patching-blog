@@ -32,12 +32,15 @@ module "ec2" {
 module "ssm_chocolatey" {
   source = "./modules/ssm-chocolatey"
 
+  # Scenario 1: Install specific older version (will upgrade to latest in Step 3)
+  # Scenario 2: Install latest, Upgrade=no (stays pinned)
+  # Scenario 3: Install latest, Upgrade=yes (always current)
   packages = [
-    { Name = "7zip", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "7zip", Version = "23.01", Upgrade = "no", Switches = "" },
+    { Name = "notepadplusplus", Version = "8.6.0", Upgrade = "no", Switches = "" },
     { Name = "googlechrome", Version = "latest", Upgrade = "yes", Switches = "" },
     { Name = "firefox", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "vim", Version = "latest", Upgrade = "yes", Switches = "" },
+    { Name = "vim", Version = "latest", Upgrade = "no", Switches = "" },
   ]
 
   association_schedule = "rate(1 day)"
