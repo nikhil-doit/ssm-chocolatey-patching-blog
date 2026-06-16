@@ -69,6 +69,12 @@ resource "aws_ssm_document" "chocolatey" {
                 }
               }
 
+              # Ensure Chocolatey is in system PATH permanently
+              $currentPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+              if ($currentPath -notlike "*$chocoPath*") {
+                [Environment]::SetEnvironmentVariable("Path", "$currentPath;$chocoPath", "Machine")
+              }
+
               # Verify choco is available
               if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
                 Write-Error "Chocolatey installation failed"
