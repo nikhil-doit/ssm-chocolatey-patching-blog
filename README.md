@@ -5,7 +5,7 @@ Terraform code to automate third-party application installs and upgrades on Wind
 ## Architecture
 
 ```
-GitHub → Terraform Cloud → AWS (SSM Parameter + Document + Association) → EC2 Windows Instances (Chocolatey)
+GitHub → Terraform → AWS (SSM Parameter + Document + Association) → EC2 Windows Instances (Chocolatey)
 ```
 
 ## What This Deploys
@@ -54,7 +54,7 @@ Push to GitHub → Terraform applies → re-trigger association → packages upd
 
 ## Blog Post
 
-Full writeup: [Patching Beyond Microsoft: How I Automated Third-Party App Updates on Windows Server Using SSM and Chocolatey](#)
+Full writeup: [Patching Beyond Microsoft: How I Automated Third-Party App Updates on Windows Server Using SSM and Chocolatey](https://medium.com/@nikhilpawar1985/patching-beyond-microsoft-how-i-automated-third-party-app-updates-on-windows-server-using-ssm-and-eaf63f39f2c8)
 
 ## References
 
