@@ -20,17 +20,21 @@ GitHub → Terraform Cloud → AWS (SSM Parameter + Document + Association) → 
 ## Prerequisites
 
 - AWS account with appropriate permissions
-- Terraform Cloud workspace connected to this repo
-- AWS credentials configured in Terraform Cloud (environment variables)
+- Terraform >= 1.5.0
+- AWS credentials configured (via environment variables, CLI profile, or CI/CD pipeline)
 
 ## Usage
 
 1. Fork/clone this repo
-2. Connect to a Terraform Cloud workspace (update `organization` and `workspace` in `provider.tf`)
-3. Set environment variables in Terraform Cloud:
-   - `AWS_ACCESS_KEY_ID` (sensitive)
-   - `AWS_SECRET_ACCESS_KEY` (sensitive)
-4. Push to trigger a run
+2. Update the backend configuration in `provider.tf` to match your setup (Terraform Cloud, S3, or local)
+3. Configure AWS credentials
+4. Run:
+   ```bash
+   cd terraform
+   terraform init
+   terraform plan
+   terraform apply
+   ```
 
 ## Modifying Packages
 
