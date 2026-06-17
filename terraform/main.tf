@@ -25,7 +25,7 @@ module "ec2" {
 
   subnet_id         = module.network.public_subnet_ids[0]
   security_group_id = aws_security_group.ec2.id
-  instance_name     = "SSM-Choco-Blog"
+  instance_name     = "SSM-Choco-Blog-Test"
 }
 
 # SSM Chocolatey - Package Management
