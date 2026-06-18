@@ -3,6 +3,7 @@ variable "packages" {
     Name     = string
     Version  = string
     Upgrade  = string
+    Install  = string
     Switches = string
   }))
   description = "List of Chocolatey packages to manage"
@@ -81,12 +82,16 @@ resource "aws_ssm_document" "chocolatey" {
                   $ChocoOutput = choco list $Package.Name -r -e
 
                   if (-not $ChocoOutput) {
-                    if ($Package.Version -eq "latest") {
-                      Write-Output "Not installed. Installing latest version..."
-                      choco install $Package.Name -r -y --no-progress $Package.Switches
+                    if ($Package.Install -eq "yes") {
+                      if ($Package.Version -eq "latest") {
+                        Write-Output "Not installed. Installing latest version..."
+                        choco install $Package.Name -r -y --no-progress $Package.Switches
+                      } else {
+                        Write-Output "Not installed. Installing version $($Package.Version)..."
+                        choco install $Package.Name --version=$($Package.Version) -r -y --no-progress $Package.Switches
+                      }
                     } else {
-                      Write-Output "Not installed. Installing version $($Package.Version)..."
-                      choco install $Package.Name --version=$($Package.Version) -r -y --no-progress $Package.Switches
+                      Write-Output "$($Package.Name) not installed. Install=no. Skipping..."
                     }
                   } elseif ($Package.Upgrade -eq "yes") {
                     $parts = $ChocoOutput.split('|')

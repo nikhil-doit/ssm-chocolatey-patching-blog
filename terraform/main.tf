@@ -34,11 +34,11 @@ module "ssm_chocolatey" {
 
   # Upgrade demo: 7zip and notepadplusplus to latest
   packages = [
-    { Name = "7zip", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "googlechrome", Version = "latest", Upgrade = "yes", Switches = "--ignore-checksums" },
-    { Name = "firefox", Version = "latest", Upgrade = "yes", Switches = "" },
-    { Name = "vim", Version = "latest", Upgrade = "no", Switches = "" },
+    { Name = "7zip", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+    { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+    { Name = "googlechrome", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "--ignore-checksums" },
+    { Name = "firefox", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+    { Name = "vim", Version = "latest", Upgrade = "yes", Install = "no", Switches = "" },
   ]
 
   association_schedule = "rate(1 day)"
