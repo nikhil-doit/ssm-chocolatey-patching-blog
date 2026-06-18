@@ -42,13 +42,16 @@ Edit the `packages` list in `terraform/main.tf`:
 
 ```hcl
 packages = [
-  { Name = "7zip", Version = "latest", Upgrade = "yes", Switches = "" },
-  { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Switches = "" },
-  { Name = "googlechrome", Version = "latest", Upgrade = "yes", Switches = "--ignore-checksums" },
-  { Name = "firefox", Version = "latest", Upgrade = "yes", Switches = "" },
-  { Name = "vim", Version = "latest", Upgrade = "no", Switches = "" },
+  { Name = "7zip", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+  { Name = "notepadplusplus", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+  { Name = "googlechrome", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "--ignore-checksums" },
+  { Name = "firefox", Version = "latest", Upgrade = "yes", Install = "yes", Switches = "" },
+  { Name = "vim", Version = "latest", Upgrade = "yes", Install = "no", Switches = "" },
 ]
 ```
+
+- `Install = "yes"` + `Upgrade = "yes"` → installs if missing, upgrades if present
+- `Install = "no"` + `Upgrade = "yes"` → only upgrades if already installed, skips otherwise
 
 Push to GitHub → Terraform applies → re-trigger association → packages updated.
 
