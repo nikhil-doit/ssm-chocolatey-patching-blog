@@ -1,7 +1,0 @@
-[
-  { "Name": "7zip", "Version": "23.01", "Upgrade": "no", "Install": "yes", "Switches": "" },
-  { "Name": "notepadplusplus", "Version": "8.6.0", "Upgrade": "no", "Install": "yes", "Switches": "" },
-  { "Name": "googlechrome", "Version": "latest", "Upgrade": "yes", "Install": "yes", "Switches": "--ignore-checksums" },
-  { "Name": "firefox", "Version": "latest", "Upgrade": "yes", "Install": "yes", "Switches": "" },
-  { "Name": "vim", "Version": "latest", "Upgrade": "yes", "Install": "no", "Switches": "" }
-]
