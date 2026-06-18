@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "ssm_get_parameter" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = "ssm:GetParameter"
+      Action   = "ssm:GetParameter*"
       Resource = "*"
     }]
   })
